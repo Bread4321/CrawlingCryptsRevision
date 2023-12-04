@@ -10,18 +10,21 @@ using Image = UnityEngine.UI.Image;
 public class bossScript: MonoBehaviour
 {
 
-
+    public GameObject Projectile;
     private Transform Playert;
-    private Movement Player;
+    //private Movement Player;
     private float health = 25;
     public Canvas endScreen;
     public GameObject player;
     private bool directionOfPlayer;
+    private IEnumerator coroutine;
+    private float timer = 0;
 
     [SerializeField] private Rigidbody2D rb;
     [SerializeField] private GameObject skel;
     [SerializeField] private float speed;
 
+    int count = 0;
     // Use this for initialization
     void Start()
     {
@@ -34,6 +37,7 @@ public class bossScript: MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        timer += Time.deltaTime;
         Vector3 displacement = Playert.position - transform.position;
         displacement = displacement.normalized;
         if (Vector2.Distance(Playert.position, transform.position) > 1.0f)
@@ -55,7 +59,16 @@ public class bossScript: MonoBehaviour
             localScale.x *= -1f;
             transform.localScale = localScale;
         }
-
+        
+        if (health < 30)
+        {
+            if (timer > 10) 
+            {
+                coroutine = Fire(3);
+                StartCoroutine(coroutine);
+                timer = 0;
+            }
+        }
     }
     private void FixedUpdate()
     {
@@ -87,5 +100,17 @@ public class bossScript: MonoBehaviour
         }
     }
 
+    private IEnumerator Fire(int counter)
+    {
+        Instantiate(Projectile, new Vector3(Playert.position.x + 15f, Playert.position.y, Playert.position.z), this.transform.rotation);
 
+        yield return new WaitForSeconds(3);
+
+        if (counter > 1) 
+        {
+            coroutine = Fire(counter - 1);
+            StartCoroutine(coroutine);
+            timer = 0;
+        }
+    }
 }
